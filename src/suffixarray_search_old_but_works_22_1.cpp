@@ -87,6 +87,8 @@ int main(int argc, char const* const* argv) {
     duration<double, std::milli> ms_double = t2 - t1;
     std::cout << "time for building the suffix arrray: "<< ms_double.count() << "ms\n"; 
     
+    //printf("yay");                                 
+    //divsufsort(reinterpret_cast<sauchar_t const*>(reference.data()), saidx_t* & suffixarray, reference.size()); 
     //!ImplementMe implement suffix array sort
     //Hint, if can use libdivsufsort (already integrated in this repo)
     //      https://github.com/y-256/libdivsufsort
@@ -107,11 +109,12 @@ int main(int argc, char const* const* argv) {
     std::cout<<"number of queries: " <<queries.size();
     for (auto& q : queries) {
 	//if(howoften>=10){
+	//	std::cout<<"here";
 	//	break;
 	//}
    	int m = q.size();  // get length of pattern, needed for strncmp()
     	int n = reference.size();
-	std::vector<char> q_char; //(q.begin(),q.end());
+	std::vector<char> q_char;
 	for (int i=0; i<m; i++)
 		q_char.push_back(q[i].to_char());
 
@@ -119,6 +122,7 @@ int main(int argc, char const* const* argv) {
     // built suffix array
     //
     // left search
+    //
     
 	
 	int LP;
@@ -127,30 +131,70 @@ int main(int argc, char const* const* argv) {
 	int r=n-1;
 	int M;
 	if (q_char<=std::vector<char> (T.begin()+SA[0],T.begin()+SA[0]+m)){
+		std::cout<<"guck hier";
+		//print_vec(q_char,0,m);
+		//print_vec(T,SA[0],SA[0]+m+1);
+		//std::cout<<std::endl;
+			//strcmp((q_char.begin(),q_char.end()).c_str(),(T.begin()+SA[0],T.end() ).c_str())<0) {
+				//std::string( std::vector<char> (T.begin()+SA[0],T.end())) )<=0 ) {
+			//q_char<=std::vector<char> (T.begin()+SA[0],T.end()))))){
 		LP=0;
     	}	
 	else if ( q_char>std::vector<char> (T.begin()+SA[n-1],T.begin()+SA[n-1]+m)){
+			std::cout<<"guck  hier";
+			//print_vec(q_char,0,m);
+			//print_vec(T,SA[n],SA[n]+m+1);
+
+			//strcmp(std::string::c_str(q_char.begin(),q_char.end()),std::string::c_str(q_char.begin(),q_char.end()))<0){
+				
+				//std::string(std::vector<char> (T.begin()+SA[n],T.end())) ) >0) {
+			//q_char> std::vector<char>(T.begin()+SA[n],T.end())) {
 		LP=n-1;
 	}
     	else{	
 		l=0;
 		r=n-1;	
 		while((r-l)>1){
+			//std::cout<<std::endl;
 			//std::cout<<"iteration:";
 			M=std::ceil((l+r)/2.0);
-			if (strcmp(std::string(begin(q_char),end(q_char)).c_str(),std::string(T.begin()+SA[M],T.begin()+SA[M]+m).c_str())<=0){
-				       //	q_char<=std::vector<char> (T.begin()+SA[M],T.begin()+SA[M]+m)){
+			//M=(l+r)/2.0;
+			//std::cout<<"\n M: "<<M<<std::endl;
+			if ( q_char<=std::vector<char> (T.begin()+SA[M],T.begin()+SA[M]+m)){
+				//for (int i=0;i<m;i++)
+				//	std::cout<<q_char[i];
+				//std::cout<<q_char<<std::endl;
+				//std::cout<<std::endl;
+				//for (int i=0; i<m; i++)
+				//	std::cout<<T[SA[M]+m];
+				//std::cout<<std::endl;
+				//	std::lexicographical_compare(q.begin(), q.end(), reference.begin() + SA[M],reference.begin() + SA[M] + m)) {
+
+					
+					// q_char<=std::vector<char> (T.begin()+SA[M],T.end())){
+				//std::cout<<"guck hier  :";
+				//print_vec(q_char,0,m);
+				//print_vec(T,SA[M],SA[M]+m+1);
+					//strcmp(std::string::c_str(q_char.begin(),q_char.end()),std::string::c_str(q_char.begin(),q_char.end()))<0){
+						//std::string(std::vector<char> (T.begin()+SA[M],T.end())))>=0 ){
+					//q_char<=std::vector<char>(T.begin()+SA[M],T.end())){
 				r=M;
 			}	
 			else{
+				//std::cout<<"greater";
+				//print_vec(q_char,0,m);
+				//print_vec(T,SA[M],SA[M]+m+1);
 				l=M;
 			}
+			//LP=r;
 		}
+		if (M==0)
+			std::cout<<"darf nicht sein"<<std::endl;
 		LP=r;
-		
-		//find RP
+	
 		l=0;
 		r=n-1;
+		//int RP;
 		if ( q_char < std::vector<char>(T.begin()+SA[0],T.begin()+SA[0]+m))
 			RP=0;
 		else if(q_char >= std::vector<char>(T.begin()+SA[n-1],T.begin()+SA[n-1]+m))
@@ -158,20 +202,147 @@ int main(int argc, char const* const* argv) {
 		while((r-l)>1) {
 			M=std::floor((l+r)/2.0);
 			if ( std::vector<char>(T.begin()+SA[M], T.begin() + SA[M]+m) <=q_char){
+					//std::lexicographical_compare(reference.begin() + SA[M],reference.begin()+SA[M]+m,q.begin(), q.end())) {
 				l=M;
+
 			}
 			else {
 				r=M;
 			}
 		}	
 		RP=l;
-	}	
 
-        if (LP<=RP){
-		std::cout<<"Pattern found " << RP-LP+1 <<" times, first position: "<<SA[LP]<<std::endl;
-			std::cout<<std::endl;//can be simply adapted to print all positions
+
+	}	
+	if (LP==n){
+		std::cout<<"SA[LP]: "<< SA[LP] <<"suffix: "<<std::endl;
+			//print_vec(T,SA[LP-1],SA[LP-1]+m);
+		for (auto x: std::vector<seqan3::dna5> (reference.begin()+SA[LP],reference.begin()+SA[LP]+m))
+               		std::cout<<x.to_char();
+               		std::cout<<std::endl;		
+		std::cout<<"pattern: "<<std::endl;
+		for (auto & x : q)
+			std::cout<<x.to_char();
+		std::cout<<std::endl;
+			//print_vec(q_char,0,m);
+		std::cout<<"SA[RP]: " << SA[RP] << "suffix: "<<std::endl;
+		for (auto x: std::vector<seqan3::dna5> (reference.begin()+SA[RP],reference.begin()+SA[RP]+m))
+      	       		std::cout<<x.to_char();
+			std::cout<<std::endl;
+	}
+	
+ 	
+	
+	//std::cout<<"LP: " << LP<<"suffix: " ;
+	//print_vec(T,SA[LP-1],SA[LP-1]+m);
+	//print_vec(q_char,0,m);
+	
+	//std::cout<<"RP: "<< RP <<"suffix: ";
+	//print_vec(T,SA[RP], SA[RP]+m);
+	//print_vec(q_char,0,m);
+	//int RP;
+	l=0;
+	r =n-1;
+
+	if (q_char<std::vector<char>(T.begin()+SA[0],T.begin()+SA[0]+m)){
+		//RP=0;
+	}
+	else if(q_char>=std::vector<char>(T.begin()+SA[n],T.begin()+SA[n]+m)){
+		//RP=n;
+		//std::cout<<"why?";
+		//for (int i=0;i<m;i++) {
+		//	std::cout<<T[SA[n]+i];
+		//}
+		//std::cout<<std::endl;
+		
+		//for (int i=0;i<m;i++) {
+		//	std::cout<<q_char[i];
+		//}
+		//std::cout<<std::endl;
+		//std::cout<<"why?";
+		
+	}
+	else{ 
+		while((r-l)>1) {
+		M=std::ceil((l+r)/2);
+		//if(q_char<std::vector<char>(T.begin()+SA[M],T.begin()+SA[M]+m) ){
+		//	r=M;
+		//}
+		//else {
+		//	l=M;
+		//}
+		//
+		if(q_char==std::vector<char>(T.begin()+SA[M],T.begin()+SA[M]+m)) {
+			l=M;	
+			}
+		else{
+			r=M;
+		}
+
+		}	
 
 	}
+	//std::cout<<"RP: "<<RP<<"suffix: ";
+	//print_vec(T,SA[RP],SA[RP]+m);
+	//print_vec(q_char,0,m);
+	//if (LP<=RP){
+        if (1){
+		std::cout<<"LP:"<<LP;
+		std::cout<<"RP:"<<RP;
+		std::cout<<"Pattern found " << RP-LP+1 <<" times at positions "<<SA[LP]<<std::endl;
+			//for (int i=0; i<RP-LP; i++) {
+			//	std::cout<<SA[LP+i];
+			//}
+			std::cout<<std::endl;
+
+	}
+	//std::cout<<"now right:"<<std::endl;
+
+	l=0;
+	r=n-1;
+	while (l <= r)
+    	{
+        // See if 'pat' is prefix of middle suffix in suffix array
+        	int mid = l + (r - l)/2; 
+		std::vector<seqan3::dna5> ref2(reference.begin()+SA[mid],reference.begin()+SA[mid]+m);
+		//std::cout<<SA[mid]<<std::endl;
+		int res4=0;
+		for (int i=0; i<q.size(); i++){
+			if (reference[SA[mid]+i].to_char() > q[i].to_char()){
+				//std::cout<<q[i].to_char() <<"is smaller than" << reference[SA[mid]+i].to_char()<<std::endl;
+				res4-=1;//R=M
+				break;}
+			if (reference[SA[mid]+i].to_char()< q[i].to_char()){
+				res4+=1;
+				//std::cout<<q[i].to_char() <<"is larger than"<<reference[SA[mid]+i].to_char()<<std::endl;
+				break;
+			}
+		}
+
+		//std::cout<<res4<<std::endl;
+
+        	if (res4 == 0)
+        	{
+			std::cout<<"\n";
+			std::cout << "Pattern found at index " << SA[mid]<< std::endl;
+		
+//		for (auto & element: ref2)
+	//		std::cout<<element.to_char();
+    
+//		for (auto & element: q)
+	//		std::cout<<element.to_char();
+        	}
+
+
+ 
+        // Move to left half if pattern is alphabetically less than
+        // the mid suffix
+        	if (res4 < 0) r = mid - 1;
+ 
+        // Otherwise move to right half
+        	else l = mid + 1;
+	} 
+ 	//free(q_char);
 	
 	    //!TODO !ImplementMe apply binary search and find q  in reference using binary search on `suffixarray`
         // You can choose if you want to use binary search based on "naive approach", "mlr-trick", "lcp"

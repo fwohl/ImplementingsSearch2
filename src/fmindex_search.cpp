@@ -6,6 +6,7 @@
 #include <seqan3/io/sequence_file/all.hpp>
 #include <seqan3/search/fm_index/fm_index.hpp>
 #include <seqan3/search/search.hpp>
+#include <sys/resource.h>
 
 int main(int argc, char const* const* argv) {
     seqan3::argument_parser parser{"fmindex_search", argc, argv, seqan3::update_notifications::off};
@@ -59,7 +60,33 @@ int main(int argc, char const* const* argv) {
         std::copy_n(queries.begin(), old_count, queries.begin() + old_count);
     }
     queries.resize(number_of_queries); // will reduce the amount of searches
-
+    seqan3::configuration const cfg2 = seqan3::search_cfg::max_error_total{seqan3::search_cfg::error_count{1}}
+                                        | seqan3::search_cfg::max_error_substitution{seqan3::search_cfg::error_count{0}}
+                                        | seqan3::search_cfg::max_error_insertion{seqan3::search_cfg::error_count{1}}
+                                        | seqan3::search_cfg::max_error_deletion{seqan3::search_cfg::error_count{1}};    
+        
+    using namespace std::chrono;
+    auto start = high_resolution_clock::now();
+    struct rusage r_usage;
+    auto res2 = seqan3::search(queries, index);
+    for (auto && result : res2)
+	    seqan3::debug_stream <<result << '\n';
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+ 
+    std::cout << "Time taken by searching in FM-Index for: " << number_of_queries << " many queries "
+         << duration.count() << " microseconds" << std::endl;
+    getrusage(RUSAGE_SELF, &r_usage);
+    printf("Memory usage = %ld\n", r_usage.ru_maxrss);
+    //int i=0;
+    //for (auto & q : queries){
+      //  std::cout<<"iteration :" <<i;
+	//auto res = seqan3::search(q, index,cfg2);
+	//for (auto && result : res)
+        //	seqan3::debug_stream << result << '\n';
+	//std::cout<<std::endl;
+	//i++;
+   // }
     //!TODO !ImplementMe use the seqan3::search function to search
     seqan3::configuration const cfg = seqan3::search_cfg::max_error_total{seqan3::search_cfg::error_count{number_of_errors}};
 

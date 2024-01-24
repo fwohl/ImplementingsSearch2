@@ -8,8 +8,25 @@
 #include <seqan3/search/search.hpp>
 
 // prints out all occurences of query inside of ref
-void findOccurences(std::vector<seqan3::dna5> const& ref, std::vector<seqan3::dna5> const& query) {
-    //!TODO ImplementMe
+void findOccurences(std::vector<seqan3::dna5> const& txt, std::vector<seqan3::dna5> const& pat) {    	
+	int M = pat.size();
+	int N = txt.size();
+	std::cout << M;
+	  	/* A loop to slide pat[] one by one */
+	for (int i = 0; i <= N - M; i++) {
+        	int j;
+ 
+        /* For current index i, check for pattern match */
+        	for (j = 0; j < M; j++)
+            		if (txt[i + j] != pat[j])
+                	break;
+ 
+        	if (j== M) // if pat[0...M-1] = txt[i, i+1, ...i+M-1]
+			    std::cout << "Pattern found at index " << i << std::endl;
+    }
+	
+	
+	//!TODO ImplementMe
 }
 
 int main(int argc, char const* const* argv) {

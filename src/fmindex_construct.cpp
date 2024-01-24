@@ -25,10 +25,10 @@ int main(int argc, char const* const* argv) {
         seqan3::debug_stream << "Parsing error. " << ext.what() << "\n";
         return EXIT_FAILURE;
     }
-
+    //seqan3::debug_stream << seqan3::format_fastq::file_extensions << '\n'; // prints [fastq,fq]
     // loading our files
     auto reference_stream = seqan3::sequence_file_input{reference_file};
-
+    //auto reference_stream = seqan3::sequence_file_input{reference_file};
     // read reference into memory
     std::vector<std::vector<seqan3::dna5>> reference;
     for (auto& record : reference_stream) {

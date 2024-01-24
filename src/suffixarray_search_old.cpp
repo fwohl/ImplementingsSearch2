@@ -7,20 +7,6 @@
 #include <seqan3/io/sequence_file/all.hpp>
 #include <seqan3/search/fm_index/fm_index.hpp>
 #include <seqan3/search/search.hpp>
-using std::chrono::high_resolution_clock;
-using std::chrono::duration_cast;
-using std::chrono::duration;
-using std::chrono::milliseconds;
-#include <sys/resource.h>
-void print_vec(std::vector<char> * vecpoint, int first, int last) {
-                for (int i=0; i<(last-first);i++)
-                        std::cout<< & vecpoint[i];
-                std::cout<<std::endl;
-        }
-
-                                  //q_char<=std::vector<char> (T.begin()+SA[0],T.end()))))){
-                        //q_char<=std::vector<char> (T.begin()+SA[0],T.end()))))){
-
 
 int main(int argc, char const* const* argv) {
     seqan3::argument_parser parser{"suffixarray_search", argc, argv, seqan3::update_notifications::off};
@@ -62,8 +48,7 @@ int main(int argc, char const* const* argv) {
     for (auto& record : query_stream) {
         queries.push_back(record.sequence());
     }
-    std::cout<<"number of queries before: " <<queries.size();
-    
+
     // duplicate input until its large enough
     while (queries.size() < number_of_queries) {
         auto old_count = queries.size();
@@ -72,21 +57,23 @@ int main(int argc, char const* const* argv) {
     }
     queries.resize(number_of_queries); // will reduce the amount of searches
 
-    //time for building SA
-    //
-    auto t1 = high_resolution_clock::now();
-
-
     // Array that should hold the future suffix array
     std::vector<saidx_t> suffixarray;
     suffixarray.resize(reference.size()); // resizing the array, so it can hold the complete SA
 
     int *SA = (int *)malloc(reference.size() * sizeof(int));
     divsufsort(reinterpret_cast<sauchar_t const*>(reference.data()), SA, reference.size());
-    auto t2 = high_resolution_clock::now();
-    duration<double, std::milli> ms_double = t2 - t1;
-    std::cout << "time for building the suffix arrray: "<< ms_double.count() << "ms\n"; 
     
+   // for(int i = 0; i < reference.size(); ++i) {
+     //   printf("SA[%2d] = %2d: ", i, SA[i]);
+        //for(j = SA[i]; j < n; ++j) {
+          //  printf("%c", Text[j]);
+        //}
+       // printf("$\n");
+    //}   
+   
+    printf("yay");                                 
+    //divsufsort(reinterpret_cast<sauchar_t const*>(reference.data()), saidx_t* & suffixarray, reference.size()); 
     //!ImplementMe implement suffix array sort
     //Hint, if can use libdivsufsort (already integrated in this repo)
     //      https://github.com/y-256/libdivsufsort
@@ -94,96 +81,87 @@ int main(int argc, char const* const* argv) {
     //      cast it by calling:
     //      `sauchar_t const* str = reinterpret_cast<sauchar_t const*>(reference.data());`
     
-    //time for searching of query:
-    auto t11 = high_resolution_clock::now();
-    struct rusage r_usage;
-
-
-    std::vector<char> T;
-    for (int i=0; i<reference.size(); i++)
-	    T.push_back(reference[i].to_char());
-    
-    int howoften=0;
-    std::cout<<"number of queries: " <<queries.size();
     for (auto& q : queries) {
-	//if(howoften>=10){
-	//	break;
-	//}
-   	int m = q.size();  // get length of pattern, needed for strncmp()
+    
+    	int m = q.size();  // get length of pattern, needed for strncmp()
     	int n = reference.size();
-	std::vector<char> q_char; //(q.begin(),q.end());
-	for (int i=0; i<m; i++)
-		q_char.push_back(q[i].to_char());
-
+    	std::cout<<m<<n<<std::endl;
+	//printf(char(m));
     // Do simple binary search for the pat in txt using the
     // built suffix array
-    //
-    // left search
-    
+    	int l = 0, r = n-1;  // Initialize left and right indexes
+    	while (l <= r)
+    	{
+        // See if 'pat' is prefix of middle suffix in suffix array
+        	int mid = l + (r - l)/2;
 	
-	int LP;
-	int RP;
-	int l=0;
-	int r=n-1;
-	int M;
-	if (q_char<=std::vector<char> (T.begin()+SA[0],T.begin()+SA[0]+m)){
-		LP=0;
-    	}	
-	else if ( q_char>std::vector<char> (T.begin()+SA[n-1],T.begin()+SA[n-1]+m)){
-		LP=n-1;
-	}
-    	else{	
-		l=0;
-		r=n-1;	
-		while((r-l)>1){
-			//std::cout<<"iteration:";
-			M=std::ceil((l+r)/2.0);
-			if (strcmp(std::string(begin(q_char),end(q_char)).c_str(),std::string(T.begin()+SA[M],T.begin()+SA[M]+m).c_str())<=0){
-				       //	q_char<=std::vector<char> (T.begin()+SA[M],T.begin()+SA[M]+m)){
-				r=M;
-			}	
-			else{
-				l=M;
-			}
+		int res=0; 
+		std::vector<seqan3::dna5> ref2(reference.begin()+SA[mid],reference.begin()+SA[mid]+m);
+		std::cout<<"length"<<ref2.size()<<std::endl;
+	//	std::vector<char> ref3;
+		//for (auto j : ref2)
+		//	std::cout<<j<<std::endl;
+	//		ref3.push_back(char(j));
+		int res4=0;
+		for (int i=0; i<q.size(); i++){
+			if (ref2[i] > q[i])
+				res4-=1;
+				break;
+			if (ref2[i] < q[i])
+				res4+=1;
+				break;
 		}
-		LP=r;
-		
-		//find RP
-		l=0;
-		r=n-1;
-		if ( q_char < std::vector<char>(T.begin()+SA[0],T.begin()+SA[0]+m))
-			RP=0;
-		else if(q_char >= std::vector<char>(T.begin()+SA[n-1],T.begin()+SA[n-1]+m))
-			RP=n-1;	
-		while((r-l)>1) {
-			M=std::floor((l+r)/2.0);
-			if ( std::vector<char>(T.begin()+SA[M], T.begin() + SA[M]+m) <=q_char){
-				l=M;
-			}
-			else {
-				r=M;
-			}
-		}	
-		RP=l;
-	}	
+    		//auto fooswoos = std::views::zip(ref2,q);
+		//for(auto [foo, woo] : fooswoos) {
+     			//woo += foo;
+		//	if(foo<woo)
+		//		res4-=1;
+		//		break;
+		//	if(foo<woo)
+		//		res4+=1;
+		//		break;	
+  			
+	//	}		//std::cout << i.get<0>() << ' ' << i.get<1>() << ' ';		//std::vector<char> q4(q.begin(),q.end());
+		std::cout<<res4<<std::endl;
+	//	int res2= strncmp(ref3,ref3,m);
+		//seqan3::dna5
+	//std::cout<<q[5];
+		//printf(ref2);
+		//int l = 0;
+		//if (ref2 == q)
+		//	res=0;
+		//if (ref2 != q)
+		//	res=1;
+	//	for (auto vec3 : q) {
+	//	std::cout<<ref2;
+	//		l+=1;
+		//if (q[i]!=reference[SA[mid]+i]):
+		//	res+=1
+	//	}	 
+	//int res = strncmp(qq, reference[SA[mid]], m);
+ 
+        // If match found at the middle, print it and return
+        	if (res == 0)
+        	{
+			std::cout << "Pattern found at index " << SA[mid]<< std::endl;
 
-        if (LP<=RP){
-		std::cout<<"Pattern found " << RP-LP+1 <<" times, first position: "<<SA[LP]<<std::endl;
-			std::cout<<std::endl;//can be simply adapted to print all positions
-
-	}
+		for (auto & element: ref2)
+			std::cout<<element.to_char()<<std::endl;
+    
+        	}
+ 
+        // Move to left half if pattern is alphabetically less than
+        // the mid suffix
+        	if (res < 0) r = mid - 1;
+ 
+        // Otherwise move to right half
+        	else l = mid + 1;
+	} 
+ 	
 	
 	    //!TODO !ImplementMe apply binary search and find q  in reference using binary search on `suffixarray`
         // You can choose if you want to use binary search based on "naive approach", "mlr-trick", "lcp"
-    
-    howoften +=1;
-    
-    //std::cout<<"running " << howoften <<" times. \n";
     }
-    auto t22 = high_resolution_clock::now();
-    duration<double, std::milli> ms_double1 = t22 - t11;
 
-    std::cout<< "time for searching of query: "<< ms_double1.count() << "ms\n";
-    getrusage(RUSAGE_SELF,&r_usage);
-    printf("Memory usage = %ld\n",r_usage.ru_maxrss);    
+    
 }
