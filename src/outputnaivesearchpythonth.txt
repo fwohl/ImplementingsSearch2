@@ -1,1 +1,0 @@
-Took 2004.528 seconds for 1,000 queries of length 100
