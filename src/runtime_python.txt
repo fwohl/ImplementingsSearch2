@@ -1,2 +1,0 @@
-time for 1000 queries: 696.7224609319819ms
-time for 10000 queries: 7826.953609383025ms
