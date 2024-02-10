@@ -1,4 +1,5 @@
 #include <sstream>
+#include <fstream>
 
 #include <seqan3/alphabet/nucleotide/dna5.hpp>
 #include <seqan3/argument_parser/all.hpp>
@@ -6,19 +7,22 @@
 #include <seqan3/io/sequence_file/all.hpp>
 #include <seqan3/search/fm_index/fm_index.hpp>
 #include <seqan3/search/search.hpp>
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+using std::chrono::duration;
+using std::chrono::milliseconds;
+#include <sys/resource.h> 
 
-// prints out all occurences of query inside of ref
 void findOccurences(std::vector<seqan3::dna5> const& txt, std::vector<seqan3::dna5> const& pat) {    	
 	int M = pat.size();
 	int N = txt.size();
-	std::cout << M;
 	  	/* A loop to slide pat[] one by one */
 	for (int i = 0; i <= N - M; i++) {
         	int j;
  
         /* For current index i, check for pattern match */
         	for (j = 0; j < M; j++)
-            		if (txt[i + j] != pat[j])
+            		if (txt[i + j].to_char() != pat[j].to_char() )
                 	break;
  
         	if (j== M) // if pat[0...M-1] = txt[i, i+1, ...i+M-1]
@@ -75,13 +79,26 @@ int main(int argc, char const* const* argv) {
         std::copy_n(queries.begin(), old_count, queries.begin() + old_count);
     }
     queries.resize(number_of_queries); // will reduce the amount of searches
+    
 
+    auto t1 = high_resolution_clock::now();
     //! search for all occurences of queries inside of reference
     for (auto& r : reference) {
         for (auto& q : queries) {
             findOccurences(r, q);
         }
     }
+    auto t2 = high_resolution_clock::now();
+    duration<double, std::milli> ms_double= t2-t1;
+    std::cout<<"time for naive search: " <<ms_double.count()<<"ms\n";
+    
+    struct rusage r_usage;    
+    getrusage(RUSAGE_SELF, &r_usage);
+    std::ofstream outputfile;
+    outputfile.open("memoryandruntime.txt");
+    outputfile<<"memory: "<<r_usage.ru_maxrss<<"time: "<<ms_double.count()<<"ms\n";
+    outputfile.close();
+
 
     return 0;
 }

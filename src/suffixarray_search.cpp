@@ -1,6 +1,9 @@
 #include <divsufsort.h>
 #include <sstream>
-
+#include <fstream>
+#include <string>
+#include <vector>
+#include <iterator>
 #include <seqan3/alphabet/nucleotide/dna5.hpp>
 #include <seqan3/argument_parser/all.hpp>
 #include <seqan3/core/debug_stream.hpp>
@@ -54,6 +57,7 @@ int main(int argc, char const* const* argv) {
     std::vector<seqan3::dna5> reference;
     for (auto& record : reference_stream) {
         auto r = record.sequence();
+	std::cout<<"legth:"<<r.size()<<std::endl;
         reference.insert(reference.end(), r.begin(), r.end());
     }
 
@@ -105,6 +109,8 @@ int main(int argc, char const* const* argv) {
     
     int howoften=0;
     std::cout<<"number of queries: " <<queries.size();
+    std::vector<int> occurences;
+    std::vector<int> posi;
     for (auto& q : queries) {
 	//if(howoften>=10){
 	//	break;
@@ -169,7 +175,10 @@ int main(int argc, char const* const* argv) {
 
         if (LP<=RP){
 		std::cout<<"Pattern found " << RP-LP+1 <<" times, first position: "<<SA[LP]<<std::endl;
-			std::cout<<std::endl;//can be simply adapted to print all positions
+			std::cout<<std::endl;
+			occurences.push_back(RP-LP+1);
+			for (int i=0; i<(RP-LP+1);i++)
+				posi.push_back(SA[LP+i]);//can be simply adapted to print all positions
 
 	}
 	
@@ -185,5 +194,18 @@ int main(int argc, char const* const* argv) {
 
     std::cout<< "time for searching of query: "<< ms_double1.count() << "ms\n";
     getrusage(RUSAGE_SELF,&r_usage);
-    printf("Memory usage = %ld\n",r_usage.ru_maxrss);    
+    printf("Memory usage = %ld\n",r_usage.ru_maxrss);  
+    //for (int i=0;i<occurences.size(); i++)
+	  //std::cout<<occurences[i];
+    //std::cout<<std::endl;
+
+    std::ofstream output_file("./occurences.txt");
+    std::ostream_iterator<int> output_iterator(output_file, "\n");
+    std::copy(occurences.begin(), occurences.end(), output_iterator);
+    
+    std::ofstream output_file2("./positions.txt");
+    std::ostream_iterator<int> output_iterator2(output_file2, "\n");
+    std::copy(posi.begin(), posi.end(), output_iterator2);
+
+
 }
